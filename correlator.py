@@ -95,14 +95,17 @@ def run_correlate() -> None:
 
     # Compter le nombre de fichiers source (on recharge la liste pour l'affichage)
     nb_files = len([Path(p) for p in glob(str(ANAL_DIR / "analysis_*.json"))])
-    print(f"[CORRELATE] Chargement de {nb_files} fichier(s) d'analyse...")
+    fichier_mot = "fichier" if nb_files == 1 else "fichiers"
+    print(f"[CORRELATE] Chargement de {nb_files} {fichier_mot} d'analyse...")
 
     if not alerts:
         print("[WARN] Aucune alerte à corréler. Lancez d'abord --analyze.")
         return
 
     corr = correlate_by_ip(alerts)
-    print(f"[INFO] {len(corr)} IP(s) corrélée(s).")
+    ip_mot     = "IP" if len(corr) == 1 else "IPs"
+    ip_verbe   = "corrélée" if len(corr) == 1 else "corrélées"
+    print(f"[INFO] {len(corr)} {ip_mot} {ip_verbe}.")
 
     for ip, data in corr.items():
         level = data["risk_level"]

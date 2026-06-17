@@ -100,7 +100,8 @@ def save_analysis(alerts: list[dict]) -> Path:
 def run_analyze() -> None:
     """Point d'entrée du mode --analyze."""
     log_files = find_log_files()
-    print(f"[ANALYZE] Analyse de {len(log_files)} fichiers logs...")
+    fichier_logs = "fichier log" if len(log_files) == 1 else "fichiers logs"
+    print(f"[ANALYZE] Analyse de {len(log_files)} {fichier_logs}...")
 
     if not log_files:
         print("[WARN] Aucun fichier log trouvé. Lancez d'abord --listen.")
@@ -114,8 +115,13 @@ def run_analyze() -> None:
     bf_alerts   = detect_brute_force(all_events)
     user_alerts = detect_unusual_users(all_events)
 
-    print(f"[INFO] {len(bf_alerts)} alerte(s) BRUTE_FORCE détectée(s).")
-    print(f"[INFO] {len(user_alerts)} alerte(s) SENSITIVE_USER détectée(s).")
+    bf_alerte  = "alerte" if len(bf_alerts) == 1 else "alertes"
+    bf_verbe   = "détectée" if len(bf_alerts) == 1 else "détectées"
+    print(f"[INFO] {len(bf_alerts)} {bf_alerte} BRUTE_FORCE {bf_verbe}.")
+
+    user_alerte = "alerte" if len(user_alerts) == 1 else "alertes"
+    user_verbe  = "détectée" if len(user_alerts) == 1 else "détectées"
+    print(f"[INFO] {len(user_alerts)} {user_alerte} SENSITIVE_USER {user_verbe}.")
 
     all_alerts = bf_alerts + user_alerts
 
