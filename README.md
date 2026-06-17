@@ -110,11 +110,11 @@ python main.py --help
 
 | Membre | Module(s) pris en charge |
 |---|---|
-| Membre 1 | `main.py` (argparse, arborescence, vérifications sys) |
-| Membre 2 | `listener.py` (capture SSH, connexions actives, purge) |
-| Membre 3 | `analyzer.py` (glob, détection brute force et utilisateurs sensibles) |
-| Membre 4 | `correlator.py` (scoring, niveaux de risque, corrélation par IP) |
-| Membre 1 | `reporter.py` (rapport, informations système, archivage tar.gz) + `README.md` |
+| Jordan de SOUZA | `main.py` (argparse, arborescence, vérifications sys) |
+| AHOUANDJINOU Marie Annick | `listener.py` (capture SSH, connexions actives, purge) |
+| AWASSI Hans | `analyzer.py` (glob, détection brute force et utilisateurs sensibles) |
+| ADAMOU Nadiyath | `correlator.py` (scoring, niveaux de risque, corrélation par IP) |
+| Jordan de SOUZA | `reporter.py` (rapport, informations système, archivage tar.gz) + `README.md` |
 
 
 ## Structure du projet
