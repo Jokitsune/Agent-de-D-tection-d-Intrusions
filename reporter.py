@@ -1,6 +1,3 @@
-"""
-reporter.py — Mode --report : génération du rapport d'incident et archivage.
-"""
 
 import sys
 import platform
@@ -16,11 +13,7 @@ ANAL_DIR    = BASE_DIR / "analysis"
 REPORTS_DIR = BASE_DIR / "reports"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 def collect_system_info() -> dict:
-    """
-    Collecte les informations système via platform et sys.
-    """
     return {
         "date":         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "machine":      platform.node(),
@@ -31,10 +24,6 @@ def collect_system_info() -> dict:
 
 
 def check_disk_space() -> dict:
-    """
-    Retourne l'espace disque (total, used, free en Go) via shutil.disk_usage.
-    Ajoute un warning si l'espace libre < 10 %.
-    """
     usage = shutil.disk_usage("/")
     total_go = usage.total / (1024 ** 3)
     used_go  = usage.used  / (1024 ** 3)
@@ -52,7 +41,6 @@ def check_disk_space() -> dict:
 
 
 def _load_correlation() -> dict:
-    """Charge le dernier fichier de corrélation disponible."""
     files = sorted(glob(str(ANAL_DIR / "correlation_*.json")), reverse=True)
     if not files:
         return {}
@@ -63,7 +51,6 @@ def _load_correlation() -> dict:
 
 
 def _load_analysis_alerts() -> list[dict]:
-    """Charge toutes les alertes d'analyse pour le détail par IP."""
     files = glob(str(ANAL_DIR / "analysis_*.json"))
     alerts: list[dict] = []
     for f in files:
@@ -77,19 +64,14 @@ def _load_analysis_alerts() -> list[dict]:
 
 
 def generate_report(system_info: dict, correlation: dict, disk: dict) -> Path:
-    """
-    Génère le rapport texte dans reports/report_YYYYMMDD_HHMMSS.txt.
-    """
     ts        = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_path  = REPORTS_DIR / f"report_{ts}.txt"
 
-    # Comptage des niveaux de risque
     high = sum(1 for d in correlation.values() if d.get("risk_level") == "HIGH")
     med  = sum(1 for d in correlation.values() if d.get("risk_level") == "MEDIUM")
     low  = sum(1 for d in correlation.values() if d.get("risk_level") == "LOW")
     nb_ips = len(correlation)
 
-    # Détail des alertes brutes pour enrichir le rapport
     raw_alerts = _load_analysis_alerts()
 
     lines: list[str] = [
@@ -140,10 +122,6 @@ def generate_report(system_info: dict, correlation: dict, disk: dict) -> Path:
 
 
 def archive_report(report_path: Path) -> Path:
-    """
-    Compresse le rapport en .tar.gz dans reports/.
-    Utilise arcname pour ne stocker que le nom du fichier.
-    """
     date_str   = datetime.now().strftime("%Y%m%d")
     archive_path = REPORTS_DIR / f"report_{date_str}.tar.gz"
 
@@ -152,10 +130,7 @@ def archive_report(report_path: Path) -> Path:
 
     return archive_path
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 def run_report() -> None:
-    """Point d'entrée du mode --report."""
     print("[REPORT] Collecte des informations système...")
 
     try:
