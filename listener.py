@@ -1,6 +1,3 @@
-"""
-listener.py — Mode --listen : capture des tentatives SSH et connexions actives.
-"""
 
 import os
 import re
@@ -13,12 +10,8 @@ BASE_DIR = Path(__file__).parent
 LOGS_DIR = BASE_DIR / "logs"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 def get_failed_logins() -> list[dict]:
-    """
-    Extrait les tentatives SSH échouées via journalctl ou /var/log/auth.log.
-    Retourne une liste de dicts avec timestamp, ip, user, type.
-    """
+
     events: list[dict] = []
 
     # ── Tentative avec journalctl ─────────────────────────────────────────
@@ -29,26 +22,18 @@ def get_failed_logins() -> list[dict]:
             capture_output=True, text=True, timeout=10
         )
         raw_lines = result.stdout.splitlines()
-        # journalctl peut répondre avec succès mais sans journal réel disponible
-        # (typique en conteneur/VM de lab) : on filtre ces placeholders pour
-        # déclencher correctement le fallback ci-dessous.
         lines = [
             l for l in raw_lines
             if l.strip() and not l.strip().startswith("-- No entries")
         ]
     except (FileNotFoundError, subprocess.TimeoutExpired):
         lines = []
-
-    # ── Fallback : /var/log/auth.log ──────────────────────────────────────
     if not lines:
         auth_log = Path("/var/log/auth.log")
         if auth_log.exists():
             lines = auth_log.read_text(errors="replace").splitlines()
         else:
-            # Environnement de lab sans logs réels → on génère des données simulées
             lines = _simulated_auth_lines()
-
-    # ── Parsing ───────────────────────────────────────────────────────────
     pattern_fail = re.compile(
         r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}|\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})"
         r".*Failed password for (?:invalid user )?(\S+) from (\d+\.\d+\.\d+\.\d+)"
@@ -69,9 +54,6 @@ def get_failed_logins() -> list[dict]:
 
 
 def get_active_connections() -> list[dict]:
-    """
-    Retourne les connexions TCP actives via `ss -tnp`.
-    """
     events: list[dict] = []
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -109,10 +91,7 @@ def get_active_connections() -> list[dict]:
 
 
 def save_log(events: list[dict]) -> Path:
-    """
-    Sauvegarde les événements dans logs/capture_YYYYMMDD_HHMMSS.log.
-    Retourne le Path du fichier créé.
-    """
+
     ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = LOGS_DIR / f"capture_{ts}.log"
     log_path.write_text(
@@ -123,9 +102,7 @@ def save_log(events: list[dict]) -> Path:
 
 
 def purge_old_logs(retention_days: int = 7) -> None:
-    """
-    Supprime les fichiers de logs/ dont la date de modification dépasse retention_days.
-    """
+
     limit = datetime.now() - timedelta(days=retention_days)
     purged = 0
 
@@ -139,17 +116,11 @@ def purge_old_logs(retention_days: int = 7) -> None:
     if purged == 0:
         print("[INFO] Purge : aucun fichier expiré.")
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Helpers internes
-# ──────────────────────────────────────────────────────────────────────────────
-
 def _normalize_ts(raw: str) -> str:
     """Normalise différents formats de timestamp en 'YYYY-MM-DD HH:MM:SS'."""
     for fmt in ("%Y-%m-%dT%H:%M:%S", "%b %d %H:%M:%S", "%b  %d %H:%M:%S"):
         try:
             dt = datetime.strptime(raw.strip(), fmt)
-            # Si l'année est manquante (syslog), on injecte l'année courante
             if dt.year == 1900:
                 dt = dt.replace(year=datetime.now().year)
             return dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -159,7 +130,6 @@ def _normalize_ts(raw: str) -> str:
 
 
 def _simulated_auth_lines() -> list[str]:
-    """Données simulées pour les environnements de lab sans journald ni auth.log."""
     return [
         "2025-06-13T14:32:11+0000 sshd[1234]: Failed password for root from 192.168.1.42 port 22 ssh2",
         "2025-06-13T14:32:15+0000 sshd[1235]: Failed password for root from 192.168.1.42 port 22 ssh2",
@@ -185,8 +155,6 @@ def _simulated_connections() -> list[dict]:
         {"timestamp": now, "local_port": "443", "remote_ip": "172.16.0.3", "state": "ESTABLISHED", "type": "connection"},
     ]
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 def run_listen() -> None:
     """Point d'entrée du mode --listen."""
     print("[LISTEN] Démarrage de la capture...")
