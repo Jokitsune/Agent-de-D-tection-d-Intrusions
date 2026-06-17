@@ -1,16 +1,14 @@
-# Agent de Détection d'Intrusions — Sécurité Informatique L3
+# Agent de Détection d'Intrusions Sécurité Informatique L3
 
 1. Description du projet et objectif
 
 Ce projet implémente un **pipeline de détection d'intrusions en 4 modes** pour surveiller un serveur Linux exposé.  
 Il capture les tentatives de connexion SSH suspectes, analyse les patterns d'attaque, corrèle les événements par adresse IP avec un score de risque, puis génère un rapport d'incident complet archivé en `.tar.gz`.
 
----
-
 2. Prérequis et installation
 
 - **Python 3.10 ou supérieur**
-- **Aucune dépendance externe** — uniquement la bibliothèque standard Python
+- **Aucune dépendance externe** uniquement la bibliothèque standard Python
 - Systèmes supportés : Linux, Windows 
 
 Vérification de la version Python :
