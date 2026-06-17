@@ -1,6 +1,3 @@
-"""
-analyzer.py — Mode --analyze : détection de patterns dans les logs capturés.
-"""
 
 import json
 from pathlib import Path
@@ -13,21 +10,13 @@ ANAL_DIR  = BASE_DIR / "analysis"
 
 SENSITIVE_USERS = {"root", "admin", "oracle", "postgres"}
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 def find_log_files() -> list[Path]:
-    """
-    Utilise glob pour trouver tous les fichiers logs/*.log.
-    Retourne une liste d'objets Path.
-    """
+
     pattern = str(LOGS_DIR / "*.log")
     return [Path(p) for p in glob(pattern)]
 
 
 def parse_log(log_path: Path) -> list[dict]:
-    """
-    Lit un fichier log avec pathlib et retourne la liste des événements.
-    """
     try:
         content = log_path.read_text(encoding="utf-8")
         return json.loads(content)
@@ -37,10 +26,6 @@ def parse_log(log_path: Path) -> list[dict]:
 
 
 def detect_brute_force(events: list[dict], threshold: int = 5) -> list[dict]:
-    """
-    Regroupe les événements ssh_fail par IP.
-    Si une IP dépasse threshold → alerte BRUTE_FORCE (sévérité HIGH).
-    """
     counts: dict[str, int] = {}
     for ev in events:
         if ev.get("type") == "ssh_fail":
@@ -60,9 +45,6 @@ def detect_brute_force(events: list[dict], threshold: int = 5) -> list[dict]:
 
 
 def detect_unusual_users(events: list[dict]) -> list[dict]:
-    """
-    Détecte les tentatives sur des utilisateurs sensibles.
-    """
     seen: set[tuple] = set()
     alerts: list[dict] = []
 
@@ -84,9 +66,6 @@ def detect_unusual_users(events: list[dict]) -> list[dict]:
 
 
 def save_analysis(alerts: list[dict]) -> Path:
-    """
-    Sauvegarde les alertes en JSON dans analysis/analysis_YYYYMMDD.json.
-    """
     date_str  = datetime.now().strftime("%Y%m%d")
     out_path  = ANAL_DIR / f"analysis_{date_str}.json"
     out_path.write_text(
@@ -98,7 +77,6 @@ def save_analysis(alerts: list[dict]) -> Path:
 
 # ──────────────────────────────────────────────────────────────────────────────
 def run_analyze() -> None:
-    """Point d'entrée du mode --analyze."""
     log_files = find_log_files()
     fichier_logs = "fichier log" if len(log_files) == 1 else "fichiers logs"
     print(f"[ANALYZE] Analyse de {len(log_files)} {fichier_logs}...")
@@ -107,7 +85,7 @@ def run_analyze() -> None:
         print("[WARN] Aucun fichier log trouvé. Lancez d'abord --listen.")
         return
 
-    # Fusion de tous les événements
+
     all_events: list[dict] = []
     for lf in log_files:
         all_events.extend(parse_log(lf))
