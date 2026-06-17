@@ -1,6 +1,3 @@
-"""
-correlator.py — Mode --correlate : corrélation des alertes et calcul du score de risque.
-"""
 
 import json
 from pathlib import Path
@@ -10,7 +7,6 @@ from glob import glob
 BASE_DIR = Path(__file__).parent
 ANAL_DIR = BASE_DIR / "analysis"
 
-# ── Tableau des scores ────────────────────────────────────────────────────────
 SCORE_TABLE: dict[str, int] = {
     "BRUTE_FORCE":    30,
     "SENSITIVE_USER": 20,
@@ -26,12 +22,8 @@ def _risk_level(score: int) -> str:
     return "LOW"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 def load_analyses() -> list[dict]:
-    """
-    Utilise glob pour trouver tous les fichiers analysis/*.json (hors corrélation).
-    Charge et fusionne les alertes.
-    """
+
     pattern = str(ANAL_DIR / "analysis_*.json")
     files   = [Path(p) for p in glob(pattern)]
     alerts: list[dict] = []
@@ -48,15 +40,9 @@ def load_analyses() -> list[dict]:
 
 
 def correlate_by_ip(alerts: list[dict]) -> dict:
-    """
-    Regroupe les alertes par IP, calcule le score cumulé et le niveau de risque.
-    Retourne un dictionnaire indexé par IP.
-    """
     result: dict[str, dict] = {}
 
     for alert in alerts:
-        # Les alertes BRUTE_FORCE et PORT_SCAN ont un champ 'ip'
-        # Les alertes SENSITIVE_USER ont aussi un champ 'ip'
         ip    = alert.get("ip", "unknown")
         atype = alert.get("type", "UNKNOWN")
         score = SCORE_TABLE.get(atype, 0)
@@ -68,7 +54,6 @@ def correlate_by_ip(alerts: list[dict]) -> dict:
         if atype not in result[ip]["alerts"]:
             result[ip]["alerts"].append(atype)
 
-    # Calcul des niveaux de risque
     for ip_data in result.values():
         ip_data["risk_level"] = _risk_level(ip_data["total_score"])
 
@@ -76,9 +61,6 @@ def correlate_by_ip(alerts: list[dict]) -> dict:
 
 
 def save_correlation(result: dict) -> Path:
-    """
-    Sauvegarde dans analysis/correlation_YYYYMMDD.json avec pathlib.
-    """
     date_str = datetime.now().strftime("%Y%m%d")
     out_path = ANAL_DIR / f"correlation_{date_str}.json"
     out_path.write_text(
@@ -88,12 +70,8 @@ def save_correlation(result: dict) -> Path:
     return out_path
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 def run_correlate() -> None:
-    """Point d'entrée du mode --correlate."""
     alerts = load_analyses()
-
-    # Compter le nombre de fichiers source (on recharge la liste pour l'affichage)
     nb_files = len([Path(p) for p in glob(str(ANAL_DIR / "analysis_*.json"))])
     fichier_mot = "fichier" if nb_files == 1 else "fichiers"
     print(f"[CORRELATE] Chargement de {nb_files} {fichier_mot} d'analyse...")
