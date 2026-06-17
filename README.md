@@ -56,13 +56,13 @@ python main.py --help
 
 ## 4. Description de chaque module
 
-### `main.py` — Point d'entrée unique
+### `main.py` Point d'entrée unique
 - Vérifie que Python ≥ 3.10 (`sys.version_info`), sinon `sys.exit(1)`
 - Crée l'arborescence `logs/`, `analysis/`, `reports/` avec `pathlib`
 - Lit la variable `AGENT_DEBUG` via `os.environ.get()`
 - Parse les arguments `--listen`, `--analyze`, `--correlate`, `--report`, `--all` avec `argparse`
 
-### `listener.py` — Mode `--listen`
+### `listener.py` Mode `--listen`
 | Fonction | Rôle |
 |---|---|
 | `get_failed_logins()` | Extrait les tentatives SSH échouées via `journalctl` ou `/var/log/auth.log` (fallback simulé en lab) |
@@ -72,7 +72,7 @@ python main.py --help
 
 **Modules utilisés :** `subprocess`, `pathlib`, `os`, `datetime`, `json`
 
-### `analyzer.py` — Mode `--analyze`
+### `analyzer.py` Mode `--analyze`
 | Fonction | Rôle |
 |---|---|
 | `find_log_files()` | Trouve tous les fichiers `logs/*.log` via `glob` |
@@ -83,7 +83,7 @@ python main.py --help
 
 **Modules utilisés :** `glob`, `pathlib`, `json`, `datetime`
 
-### `correlator.py` — Mode `--correlate`
+### `correlator.py` Mode `--correlate`
 | Fonction | Rôle |
 |---|---|
 | `load_analyses()` | Charge et fusionne tous les fichiers `analysis_*.json` via `glob` |
@@ -95,7 +95,7 @@ python main.py --help
 
 **Modules utilisés :** `glob`, `pathlib`, `json`, `datetime`
 
-### `reporter.py` — Mode `--report`
+### `reporter.py` Mode `--report`
 | Fonction | Rôle |
 |---|---|
 | `collect_system_info()` | Collecte OS, architecture, machine, Python via `platform` et `sys` |
@@ -116,9 +116,6 @@ python main.py --help
 | Membre 4 | `correlator.py` (scoring, niveaux de risque, corrélation par IP) |
 | Membre 1 | `reporter.py` (rapport, informations système, archivage tar.gz) + `README.md` |
 
-> Adapter selon la composition réelle du groupe (4 à 5 membres).
-
----
 
 ## Structure du projet
 
